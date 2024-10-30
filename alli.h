@@ -23,8 +23,11 @@
 #include "cutils.h"
 #include "quickjs-libc.h"
 
-
 #include "configurations.h"
+
+#include "modules/file.h"
+
+#include "platform/file_handler.h"
 
 
 #endif

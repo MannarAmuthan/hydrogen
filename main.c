@@ -67,6 +67,7 @@ static JSContext *JS_NewCustomContext(JSRuntime *rt)
 
     js_init_module_std(ctx, "std");
     js_init_module_os(ctx, "os");
+    js_init_module_file(ctx, "file");
     return ctx;
 }
 

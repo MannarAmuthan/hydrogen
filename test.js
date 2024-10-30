@@ -1,12 +1,10 @@
 import { a }  from "./a.js";
 import * as std from "std";
+import { readFile } from "file";
 
 function add(b){
     return a+b;
 };
 
-if(std.loadFile('a.js')){
-    print(std.loadFile('a.js'));
-}
-
+var con = readFile('a.js');
 print(add(3,5));
