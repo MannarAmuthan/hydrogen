@@ -4,3 +4,4 @@ main
 .vscode
 *.js
 *.out
+.DS_Store

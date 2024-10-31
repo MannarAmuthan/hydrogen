@@ -21,15 +21,24 @@ typedef struct _FileReadRequest{
 } FileReadRequest;
 
 
-void on_open(uv_fs_t *req);
-void on_read(uv_fs_t *req);
-void on_write(uv_fs_t *req);
+typedef struct _FileWriteRequest{
+    char* file_path;
+    char* input_buffer;
+
+    uv_fs_t* open_req; 
+    uv_fs_t* read_req;   
+    uv_fs_t* write_req;   
+    uv_fs_t* close_req;
+    uv_buf_t* buffer;
+
+} FileWriteRequest;
 
 
-FileReadRequest* init_file_read_request();
-FileReadRequest* run_file_read_request(FileReadRequest* file_request);
+FileReadRequest* init_file_read_request(char* file_path);
+void run_file_read_request(FileReadRequest* file_request);
 
-
+FileWriteRequest* init_file_write_request(char* file_path, char* input_buffer);
+void run_file_write_request(FileWriteRequest* file_request);
 
 
 #endif
