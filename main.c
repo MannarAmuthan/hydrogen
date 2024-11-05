@@ -3,6 +3,33 @@
 
 
 
+
+
+/* main loop which calls the user JS callbacks */
+void callback_loops(JSContext *ctx)
+{
+    JSContext *ctx1;
+    int err;
+
+    for(;;) {
+        for(;;) {
+            err = JS_ExecutePendingJob(JS_GetRuntime(ctx), &ctx1);
+            if (err <= 0) {
+                if (err < 0) {
+                    js_std_dump_error(ctx1);
+                }
+                break;
+            }
+        }
+        if(uv_loop_alive(uv_default_loop()) != 0){
+            uv_run(uv_default_loop(), UV_RUN_ONCE);
+        }
+        else{
+            break;
+        }
+    }
+}
+
 static int eval_buf(JSContext *ctx, const void *buf, int buf_len,
                     const char *filename, int eval_flags)
 {
@@ -28,6 +55,9 @@ static int eval_buf(JSContext *ctx, const void *buf, int buf_len,
     } else {
         ret = 0;
     }
+
+    callback_loops(ctx);
+
     JS_FreeValue(ctx, val);
     return ret;
 }
@@ -68,6 +98,7 @@ static JSContext *JS_NewCustomContext(JSRuntime *rt)
     js_init_module_std(ctx, "std");
     js_init_module_os(ctx, "os");
     js_init_module_file(ctx, "file");
+    js_init_module_test(ctx, "test");
     return ctx;
 }
 

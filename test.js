@@ -1,12 +1,22 @@
-import { a }  from "./a.js";
-import * as std from "std";
+// import { a }  from "./a.js";
+import * as os from "os";
 import { readFile, writeFile } from "file";
-
-function add(b){
-    return a+b;
-};
+import { myAsyncFunction } from "test";
 
 var con = readFile('a.js');
+print("-----");
+con.then(s=>print(s)).catch(s=>print(s));
 
-writeFile('b1.js', 'my');
-print(add(3,5));
+
+
+
+var con2 = writeFile('a1.js', "heyyyy 33  yoooo");
+print("-----");
+con2.then(s=>print(s)).catch(s=>print(s));
+
+print("-----");
+print("-----");
+
+var v = myAsyncFunction();
+v.then(s=>print(s)).catch(s=>print(s));
+print("----");

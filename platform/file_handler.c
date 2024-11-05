@@ -1,79 +1,58 @@
 #include "file_handler.h"
 
 
-void on_open_for_read(uv_fs_t *req);
-void on_read(uv_fs_t *req);
-void on_write(uv_fs_t *req);
+static void promise_file_after_read_request(uv_work_t *req, int status) {
 
-
-void on_open_for_read(uv_fs_t *req) {
-
-  if (req->result != -1) {
-
-    FileReadRequest* file_request = (FileReadRequest*)req->data ;
-    uv_fs_read(uv_default_loop(), file_request->read_req, req->result,
-        file_request->buffer, 1, -1, on_read);
-
-  }
-  else {
-    fprintf(stderr, "Error opening file!");
-  }
-
-  uv_fs_req_cleanup(req);
+    FileReadRequest* file_request = (FileReadRequest*)req->data;
+    JSValue arg = JS_NewString(file_request->context, file_request->result_buffer);
+    JSValue *argv = malloc(sizeof(JSValue));
+    argv[0] = arg;
+    settle_promise(file_request->context, file_request->promise, 0, 1, argv);
 }
 
-void on_read(uv_fs_t *req) {
+static void file_read_work_cb(uv_work_t *req) {
+    FileReadRequest* file_request = (FileReadRequest*)req->data;
 
+    uv_fs_t file_req;
+    uv_file fd;
+    int r;
 
-    if (req->result < 0) {
+    r = uv_fs_open(NULL, &file_req, file_request->file_path, O_RDONLY, 0, NULL);
 
-      fprintf(stderr, "Read error!");
-
+    uv_fs_req_cleanup(&file_req);
+    if (r < 0) {
+        return;
     }
-    else if (req->result == 0) {
-      FileReadRequest* file_request = (FileReadRequest*)req->data ;
-      uv_fs_close(uv_default_loop(), file_request->close_req, file_request->open_req->result, NULL);
+    
+    fd = r;
+    size_t offset = 0;
+    
+    do{
+        r = uv_fs_read(NULL, &file_req, fd, file_request->buffer, 1, offset, NULL);
+        uv_fs_req_cleanup(&file_req);
+        if (r <= 0) {
+            break;
+        }
+        offset += r;
+        if (r != 0) {
+            break;
+        }
+    }while(1);
+
+    uv_fs_close(NULL, &file_req, fd, NULL);
+    uv_fs_req_cleanup(&file_req);
+}
+
+void run_file_read_request(FileReadRequest* file_request) {
+  
+    int t = uv_queue_work(uv_default_loop(), file_request->work, file_read_work_cb, promise_file_after_read_request);
+    if (t != 0) {
+        printf("Error");
     }
-    else {
-      FileReadRequest* file_request = (FileReadRequest*)req->data ;
-      uv_fs_close(uv_default_loop(), file_request->close_req, file_request->open_req->result, NULL);  
-    }
-
-    uv_fs_req_cleanup(req);
 }
 
 
-void on_write(uv_fs_t *req) {
-
-      if (req->result < 0) {
-        fprintf(stderr, "Write error!");
-      }
-      else {
-        FileWriteRequest* file_request = (FileWriteRequest*)req->data ;
-        uv_fs_close(uv_default_loop(), file_request->close_req, file_request->open_req->result, NULL);
-      }
-
-      uv_fs_req_cleanup(req);
-}
-
-
-void on_open_for_write(uv_fs_t *req) {
-
-  if (req->result != -1) {
-
-    FileWriteRequest* file_request = (FileWriteRequest*)req->data ;
-    uv_fs_write(uv_default_loop(), file_request->write_req, req->result,
-                        file_request->buffer, 1, -1, on_write);
-  }
-  else {
-    fprintf(stderr, "Error opening file!");
-  }
-
-  uv_fs_req_cleanup(req);
-}
-
-
-FileReadRequest* init_file_read_request(char* file_path) {
+FileReadRequest* init_file_read_request(char* file_path, JSContext *ctx) {
 
     FileReadRequest* file_request = (FileReadRequest*) malloc(sizeof(FileReadRequest));
 
@@ -83,25 +62,69 @@ FileReadRequest* init_file_read_request(char* file_path) {
     file_request->file_path = (char *)malloc(strlen(file_path));
     strcpy(file_request->file_path, file_path);
 
-    file_request->open_req = (uv_fs_t*)malloc(sizeof(uv_fs_t));
-    file_request->close_req = (uv_fs_t*)malloc(sizeof(uv_fs_t));
-    file_request->read_req = (uv_fs_t*)malloc(sizeof(uv_fs_t));
-    file_request->write_req = (uv_fs_t*)malloc(sizeof(uv_fs_t));
+    file_request->work = (uv_work_t*)malloc(sizeof(uv_work_t));
     file_request->buffer = (uv_buf_t*)malloc(sizeof(uv_buf_t));
+    file_request->context = ctx;
+    file_request->promise = malloc(sizeof(Promise));
+    file_request->promise->rfuncs = malloc(sizeof(JSValue)*2);
     
     *(file_request->buffer) = uv_buf_init(file_request->result_buffer, len);
 
-    file_request->open_req->data = file_request;
-    file_request->close_req->data = file_request;
-    file_request->read_req->data = file_request;
-    file_request->write_req->data = file_request;
+    file_request->work->data = file_request;
 
     return file_request;
 
 }
 
 
-FileWriteRequest* init_file_write_request(char* file_path, char* input_buffer) {
+
+static void promise_file_after_write_request(uv_work_t *req, int status) {
+
+    FileWriteRequest* file_request = (FileWriteRequest*)req->data;
+    JSValue arg = JS_NewInt32(file_request->context, 1);
+    JSValue *argv = malloc(sizeof(JSValue));
+    argv[0] = arg;
+    settle_promise(file_request->context, file_request->promise, 0, 1, argv);
+}
+
+static void file_write_work_cb(uv_work_t *req) {
+    FileReadRequest* file_request = (FileReadRequest*)req->data;
+
+    uv_fs_t file_req;
+    uv_file fd;
+    int r;
+    
+    int flags = O_CREAT | O_WRONLY | O_TRUNC;
+    int mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH; 
+
+    r = uv_fs_open(NULL, &file_req, file_request->file_path, flags , mode, NULL);
+    uv_fs_req_cleanup(&file_req);
+
+    if (r < 0) {
+        return;
+    }
+    
+    fd = r;
+    size_t offset = 0;
+
+    r = uv_fs_write(uv_default_loop(), &file_req, fd,
+                        file_request->buffer, 1, -1, NULL);
+    uv_fs_req_cleanup(&file_req);
+
+    uv_fs_close(NULL, &file_req, fd, NULL);
+    uv_fs_req_cleanup(&file_req);
+}
+
+void run_file_write_request(FileWriteRequest* file_request) {
+
+    int t = uv_queue_work(uv_default_loop(), file_request->work, file_write_work_cb, promise_file_after_write_request);
+    if (t != 0) {
+        printf("Error");
+    }
+}
+
+
+FileWriteRequest* init_file_write_request(char* file_path, char* input_buffer, JSContext *ctx) {
 
     FileWriteRequest* file_request = (FileWriteRequest*) malloc(sizeof(FileWriteRequest));
 
@@ -111,34 +134,17 @@ FileWriteRequest* init_file_write_request(char* file_path, char* input_buffer) {
     file_request->input_buffer = (char *)malloc(strlen(input_buffer));
     strcpy(file_request->input_buffer, input_buffer);
 
-    file_request->open_req = (uv_fs_t*)malloc(sizeof(uv_fs_t));
-    file_request->close_req = (uv_fs_t*)malloc(sizeof(uv_fs_t));
-    file_request->read_req = (uv_fs_t*)malloc(sizeof(uv_fs_t));
-    file_request->write_req = (uv_fs_t*)malloc(sizeof(uv_fs_t));
     file_request->buffer = (uv_buf_t*)malloc(sizeof(uv_buf_t));
     
     *(file_request->buffer) = uv_buf_init(file_request->input_buffer, (strlen(input_buffer)*sizeof(char)));
 
-    printf("%s\n", file_request->input_buffer);
+    file_request->work = (uv_work_t*)malloc(sizeof(uv_work_t));
+    file_request->context = ctx;
+    file_request->promise = malloc(sizeof(Promise));
+    file_request->promise->rfuncs = malloc(sizeof(JSValue)*2);
 
-    file_request->open_req->data = file_request;
-    file_request->close_req->data = file_request;
-    file_request->read_req->data = file_request;
-    file_request->write_req->data = file_request;
+    file_request->work->data = file_request;
 
     return file_request;
 
-}
-
-
-void run_file_read_request(FileReadRequest* file_request) {
-    uv_fs_open(uv_default_loop(), file_request->open_req, file_request->file_path, O_RDONLY, 0, on_open_for_read);
-    uv_run(uv_default_loop(), UV_RUN_DEFAULT);
-}
-
-void run_file_write_request(FileWriteRequest* file_request) {
-    int flags = O_CREAT | O_WRONLY | O_TRUNC;
-    int mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH; // File permissions
-    uv_fs_open(uv_default_loop(), file_request->open_req, file_request->file_path, flags , mode , on_open_for_write);
-    uv_run(uv_default_loop(), UV_RUN_DEFAULT);
 }

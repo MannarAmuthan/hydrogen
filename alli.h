@@ -26,8 +26,11 @@
 #include "configurations.h"
 
 #include "modules/file.h"
+#include "modules/test.h"
 
+#include "platform/promise.h"
 #include "platform/file_handler.h"
+
 
 
 #endif
