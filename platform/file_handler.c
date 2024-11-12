@@ -59,7 +59,7 @@ FileReadRequest* init_file_read_request(char* file_path, JSContext *ctx) {
     unsigned int len = 1000*sizeof(char);
     file_request->result_buffer = (char *)malloc(len);
 
-    file_request->file_path = (char *)malloc(strlen(file_path));
+    file_request->file_path = (char *)malloc(strlen(file_path) + 1);
     strcpy(file_request->file_path, file_path);
 
     file_request->work = (uv_work_t*)malloc(sizeof(uv_work_t));
@@ -81,10 +81,10 @@ FileReadRequest* init_file_read_request(char* file_path, JSContext *ctx) {
 static void promise_file_after_write_request(uv_work_t *req, int status) {
 
     FileWriteRequest* file_request = (FileWriteRequest*)req->data;
-    JSValue arg = JS_NewInt32(file_request->context, 1);
+    JSValue arg = JS_NewInt32(file_request->context, 3);
     JSValue *argv = malloc(sizeof(JSValue));
     argv[0] = arg;
-    settle_promise(file_request->context, file_request->promise, 0, 1, argv);
+    resolve_promise(file_request->context, file_request->promise, 1, argv);
 }
 
 static void file_write_work_cb(uv_work_t *req) {
@@ -101,6 +101,7 @@ static void file_write_work_cb(uv_work_t *req) {
     uv_fs_req_cleanup(&file_req);
 
     if (r < 0) {
+        printf("error opening file for writing\n");
         return;
     }
     
@@ -109,6 +110,10 @@ static void file_write_work_cb(uv_work_t *req) {
 
     r = uv_fs_write(uv_default_loop(), &file_req, fd,
                         file_request->buffer, 1, -1, NULL);
+    if (r < 0) {
+        printf("error writing file\n");
+        return;
+    }
     uv_fs_req_cleanup(&file_req);
 
     uv_fs_close(NULL, &file_req, fd, NULL);
@@ -128,15 +133,15 @@ FileWriteRequest* init_file_write_request(char* file_path, char* input_buffer, J
 
     FileWriteRequest* file_request = (FileWriteRequest*) malloc(sizeof(FileWriteRequest));
 
-    file_request->file_path = (char *)malloc(strlen(file_path));
+    file_request->file_path = (char *)malloc(strlen(file_path)+1);
     strcpy(file_request->file_path, file_path);
 
-    file_request->input_buffer = (char *)malloc(strlen(input_buffer));
+    file_request->input_buffer = (char *)malloc(strlen(input_buffer)+1);
     strcpy(file_request->input_buffer, input_buffer);
 
     file_request->buffer = (uv_buf_t*)malloc(sizeof(uv_buf_t));
     
-    *(file_request->buffer) = uv_buf_init(file_request->input_buffer, (strlen(input_buffer)*sizeof(char)));
+    *(file_request->buffer) = uv_buf_init(file_request->input_buffer, (strlen(file_request->input_buffer)*sizeof(char)));
 
     file_request->work = (uv_work_t*)malloc(sizeof(uv_work_t));
     file_request->context = ctx;

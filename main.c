@@ -2,9 +2,6 @@
 
 
 
-
-
-
 /* main loop which calls the user JS callbacks */
 void callback_loops(JSContext *ctx)
 {
@@ -22,7 +19,7 @@ void callback_loops(JSContext *ctx)
             }
         }
         if(uv_loop_alive(uv_default_loop()) != 0){
-            uv_run(uv_default_loop(), UV_RUN_ONCE);
+            uv_run(uv_default_loop(), UV_RUN_NOWAIT);
         }
         else{
             break;
@@ -55,9 +52,8 @@ static int eval_buf(JSContext *ctx, const void *buf, int buf_len,
     } else {
         ret = 0;
     }
-
+    
     callback_loops(ctx);
-
     JS_FreeValue(ctx, val);
     return ret;
 }
@@ -95,8 +91,8 @@ static JSContext *JS_NewCustomContext(JSRuntime *rt)
     if (!ctx)
         return NULL;
 
-    js_init_module_std(ctx, "std");
-    js_init_module_os(ctx, "os");
+    // js_init_module_std(ctx, "std");
+    // js_init_module_os(ctx, "os");
     js_init_module_file(ctx, "file");
     js_init_module_test(ctx, "test");
     return ctx;

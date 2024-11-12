@@ -21,12 +21,12 @@ typedef struct _FileReadRequest{
 } FileReadRequest;
 
 
-typedef struct _FileWriteRequest{
+typedef struct _FileWriteRequest {
     char* file_path;
     char* input_buffer;
 
     uv_buf_t* buffer;
-    
+
     uv_work_t* work;
     Promise* promise;
     JSContext *context;

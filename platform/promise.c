@@ -29,6 +29,8 @@ void settle_promise(JSContext *ctx, Promise *p, int is_reject, int argc, JSValue
     JS_FreeValue(ctx, p->rfuncs[0]);
     JS_FreeValue(ctx, p->rfuncs[1]);
     JS_FreeValue(ctx, p->p);
+
+    printf("\ncleaning up\n");
     
 }
 

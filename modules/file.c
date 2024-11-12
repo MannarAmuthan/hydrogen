@@ -7,19 +7,19 @@
 static JSValue js_read_file_async(JSContext *ctx, JSValueConst this_val,
                       int argc, JSValueConst *argv)
 {
+    
+    const char * arg_file_path = JS_ToCString(ctx, argv[0]);
 
-    const char* file_path = JS_ToCString(ctx, argv[0]);
-
-    if (file_path == NULL){
+    if (arg_file_path == NULL){
         return JS_EXCEPTION;
     }
 
-    FileReadRequest* request = init_file_read_request(file_path, ctx);
+    FileReadRequest* request = init_file_read_request(arg_file_path, ctx);
     run_file_read_request(request);
 
     JSValue promise =  init_promise(ctx, request->promise);
 
-    JS_FreeCString(ctx, file_path);
+    JS_FreeCString(ctx, arg_file_path);
 
     return promise;
 }
@@ -27,25 +27,24 @@ static JSValue js_read_file_async(JSContext *ctx, JSValueConst this_val,
 static JSValue js_write_file_async(JSContext *ctx, JSValueConst this_val,
                       int argc, JSValueConst *argv)
 {
+    const char* arg_file_path = JS_ToCString(ctx, argv[0]);
+    const char* arg_file_content = JS_ToCString(ctx, argv[1]);
 
-    const char* file_path = JS_ToCString(ctx, argv[0]);
-    const char* file_content = JS_ToCString(ctx, argv[1]);
-
-    if (file_path == NULL){
+    if (arg_file_path == NULL){
         return JS_EXCEPTION;
     }
 
-    if (file_content == NULL){
+    if (arg_file_content == NULL){
         return JS_EXCEPTION;
     }
-
-    FileWriteRequest* request = init_file_write_request(file_path, file_content, ctx);
+    
+    FileWriteRequest* request = init_file_write_request(arg_file_path, arg_file_content, ctx);
     run_file_write_request(request);
 
     JSValue promise =  init_promise(ctx, request->promise);
 
-    JS_FreeCString(ctx, file_path);
-    JS_FreeCString(ctx, file_content);
+    JS_FreeCString(ctx, arg_file_path);
+    JS_FreeCString(ctx, arg_file_content);
 
     return promise;
 }
