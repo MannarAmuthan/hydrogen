@@ -13,7 +13,7 @@ CCOPT = -g -O0
 CCFLAGS = -c $(CCOPT)
 LDFLAGS = -lpthread -lm -ldl -L$(QUICKJS_LIB_PATH) -L$(LIBUV_LIB_PATH) -lquickjs -luv
 
-main: main.o configurations.o file.o file_handler.o promise.o test.o
+main: main.o configurations.o file.o file_handler.o promise.o
 	$(LD) $^ $(LDFLAGS) -o $@ 
 
 main.o: main.c
@@ -23,9 +23,6 @@ configurations.o: configurations.c
 	$(CC) -I$(QUICKJS_INCLUDE_PATH) -Iincludes/ -I. $(CCFLAGS) $^ -o $@
 
 file.o: modules/file.c
-	$(CC) -I$(QUICKJS_INCLUDE_PATH) -I$(LIBUV_INCLUDE_PATH) -Iincludes/ -I. $(CCFLAGS) $^ -o $@
-
-test.o: modules/test.c
 	$(CC) -I$(QUICKJS_INCLUDE_PATH) -I$(LIBUV_INCLUDE_PATH) -Iincludes/ -I. $(CCFLAGS) $^ -o $@
 
 file_handler.o: platform/file_handler.c
