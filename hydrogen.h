@@ -1,5 +1,5 @@
-#ifndef __ALLI_H
-#define __ALLI_H
+#ifndef __HYDROGEN_H
+#define __HYDROGEN_H
 
 
 #include <stdlib.h>

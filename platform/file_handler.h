@@ -1,12 +1,12 @@
 
-#ifndef __ALLI_FILE_HANDLER_H
-#define __ALLI_FILE_HANDLER_H
+#ifndef __HYDROGEN_FILE_HANDLER_H
+#define __HYDROGEN_FILE_HANDLER_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <uv.h>
 #include <unistd.h>
-#include "alli.h"
+#include "hydrogen.h"
 
 typedef struct _FileReadRequest{
     char* file_path;

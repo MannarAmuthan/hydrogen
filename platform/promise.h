@@ -1,5 +1,5 @@
-#ifndef __ALLI_PROMISE_H
-#define __ALLI_PROMISE_H
+#ifndef __HYDROGEN_PROMISE_H
+#define __HYDROGEN_PROMISE_H
 
 
 typedef struct _Promise{

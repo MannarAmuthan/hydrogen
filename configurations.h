@@ -1,7 +1,7 @@
 
 
-#ifndef __ALLI_CONFIGURATIONS_H
-#define __ALLI_CONFIGURATIONS_H
+#ifndef __HYDROGEN_CONFIGURATIONS_H
+#define __HYDROGEN_CONFIGURATIONS_H
 
 
 typedef struct _configuration{

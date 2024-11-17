@@ -1,12 +1,12 @@
 
-#ifndef __ALLI_HTTP_REQUEST_H
-#define __ALLI_HTTP_REQUEST_H
+#ifndef __HYDROGEN_HTTP_REQUEST_H
+#define __HYDROGEN_HTTP_REQUEST_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <uv.h>
 #include <unistd.h>
-#include "alli.h"
+#include "hydrogen.h"
 
 typedef struct _HttpRequest {
     char* url;

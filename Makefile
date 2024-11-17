@@ -18,7 +18,7 @@ CCOPT = -g -O0
 CCFLAGS = -c $(CCOPT)
 LDFLAGS = -lpthread -lm -ldl -L$(QUICKJS_LIB_PATH) -L$(LIBUV_LIB_PATH) -L$(CURL_LIB_PATH) -lquickjs -luv -lcurl
 
-main: main.o configurations.o file.o file_handler.o promise.o http_handler.o http.o
+hydrogen: main.o configurations.o file.o file_handler.o promise.o http_handler.o http.o
 	$(LD) $^ $(LDFLAGS) -o $@ 
 
 main.o: main.c

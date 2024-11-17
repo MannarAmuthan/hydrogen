@@ -1,4 +1,4 @@
-#include "alli.h"
+#include "hydrogen.h"
 
 
 
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
     rt = JS_NewRuntime();
 
     if (!rt) {
-        fprintf(stderr, "alli: cannot allocate JS runtime\n");
+        fprintf(stderr, "hydrogen: cannot allocate JS runtime\n");
         exit(2);
     }
 
@@ -120,7 +120,7 @@ int main(int argc, char **argv)
     ctx = JS_NewCustomContext(rt);
 
     if (!ctx) {
-        fprintf(stderr, "alli: cannot allocate JS context\n");
+        fprintf(stderr, "hydrogen: cannot allocate JS context\n");
         exit(2);
     }
 
