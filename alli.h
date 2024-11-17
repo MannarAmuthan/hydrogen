@@ -20,16 +20,18 @@
 #include <malloc_np.h>
 #endif
 
+#include <curl/curl.h>
+
 #include "cutils.h"
 #include "quickjs-libc.h"
 
 #include "configurations.h"
 
 #include "modules/file.h"
+#include "modules/http.h"
 
 #include "platform/promise.h"
 #include "platform/file_handler.h"
-
-
+#include "platform/http_handler.h"
 
 #endif

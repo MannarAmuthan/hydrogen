@@ -5,3 +5,4 @@ main
 *.js
 *.out
 .DS_Store
+curl
