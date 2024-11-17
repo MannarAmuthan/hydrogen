@@ -7,12 +7,12 @@ import {get} from 'http'
 print("-----");
 
 
-get("example.com").then ((r) => {
-    print(r);
-    print("Response-----");
-}).catch((e)=> {
-    print(e);
-});
+// get("example.com").then ((r) => {
+//     print(r);
+//     print("Response-----");
+// }).catch((e)=> {
+//     print(e);
+// });
 
 // var con2 = writeFile('a1.js', "heyyyy 33  yoooo");
 // print("-----");
@@ -37,8 +37,8 @@ get("example.com").then ((r) => {
 // // v1.then(s=>print(s)).catch(s=>print(s));
 // // print("----");
 
-// var con = readFile('a.js');
-// print("-----");
+var con = await readFile('a.js');
+print(con);
 // con.then(s=>print(s)).catch(s=>print(s));
 
 // var con = readFile('a.js');

@@ -1,8 +1,10 @@
 *.o
 out
-main
+hydrogen
 .vscode
-*.js
+tee.js
+a1.js
+a.js
 *.out
 .DS_Store
 curl
