@@ -60,7 +60,7 @@ static void http_request_work_cb(uv_work_t *req) {
     chunk.memory = malloc(1);
     chunk.size = 0;
 
-    if(strcmp(http_request->method, "GET")==0){
+    if(strcmp(http_request->method, "GET")==0) {
 
 
         curl_easy_setopt(curl, CURLOPT_URL, http_request->url);

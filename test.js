@@ -2,11 +2,18 @@
 import { writeFile, readFile } from "file";
 import {a} from 'a.js'
 
-import {get} from 'http'
+import {get, createServer} from 'http'
+import {Point, createPoint} from 'point'
 
-print("-----");
 
 
+
+print( new Point(4,5).x);
+print( createPoint(4,5).x);
+
+var server = createServer();
+server.serve();
+// print(server);
 // get("example.com").then ((r) => {
 //     print(r);
 //     print("Response-----");

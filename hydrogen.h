@@ -29,9 +29,11 @@
 
 #include "modules/file.h"
 #include "modules/http.h"
+#include "modules/point.h"
 
 #include "platform/promise.h"
 #include "platform/file_handler.h"
 #include "platform/http_handler.h"
+#include "platform/http_server.h"
 
 #endif

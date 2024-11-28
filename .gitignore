@@ -8,3 +8,7 @@ a.js
 *.out
 .DS_Store
 curl
+civetweb
+modules/point*
+test
+test.c

@@ -10,6 +10,10 @@ CURL_PATH = curl
 CURL_INCLUDE_PATH = $(CURL_PATH)/include
 CURL_LIB_PATH = $(CURL_PATH)/lib/.libs
 
+
+MONGOOSE_PATH = deps/mongoose
+MONGOOSE_INCLUDE_PATH = $(MONGOOSE_PATH)
+
 DYLD_LIBRARY_PATH=curl/lib/.libs
 
 CC = clang
@@ -18,7 +22,7 @@ CCOPT = -g -O0
 CCFLAGS = -c $(CCOPT)
 LDFLAGS = -lpthread -lm -ldl -L$(QUICKJS_LIB_PATH) -L$(LIBUV_LIB_PATH) -L$(CURL_LIB_PATH) -lquickjs -luv -lcurl
 
-hydrogen: main.o configurations.o file.o file_handler.o promise.o http_handler.o http.o
+hydrogen: main.o configurations.o file.o file_handler.o promise.o http_handler.o http_server.o http.o mongoose.o
 	$(LD) $^ $(LDFLAGS) -o $@ 
 
 main.o: main.c
@@ -30,10 +34,8 @@ configurations.o: configurations.c
 file.o: modules/file.c
 	$(CC) -I$(QUICKJS_INCLUDE_PATH) -I$(LIBUV_INCLUDE_PATH) -Iincludes/ -I. $(CCFLAGS) $^ -o $@
 
-
 http.o: modules/http.c
-	$(CC) -I$(QUICKJS_INCLUDE_PATH) -I$(LIBUV_INCLUDE_PATH) -Iincludes/ -I. $(CCFLAGS) $^ -o $@
-
+	$(CC) -I$(QUICKJS_INCLUDE_PATH) -I$(LIBUV_INCLUDE_PATH) -I$(MONGOOSE_INCLUDE_PATH) -Iincludes/ -I. $(CCFLAGS) $^ -o $@
 
 file_handler.o: platform/file_handler.c
 	$(CC) -I$(QUICKJS_INCLUDE_PATH) -I$(LIBUV_INCLUDE_PATH) -Iincludes/ -I. $(CCFLAGS) $^ -o $@
@@ -41,8 +43,14 @@ file_handler.o: platform/file_handler.c
 http_handler.o: platform/http_handler.c
 	$(CC) -I$(QUICKJS_INCLUDE_PATH) -I$(LIBUV_INCLUDE_PATH) -I$(CURL_INCLUDE_PATH) -Iincludes/ -I. $(CCFLAGS) $^ -o $@
 
+http_server.o: platform/http_server.c
+	$(CC) -I$(QUICKJS_INCLUDE_PATH) -I$(LIBUV_INCLUDE_PATH) -I$(CURL_INCLUDE_PATH) -I$(MONGOOSE_INCLUDE_PATH) -Iincludes/ -I. $(CCFLAGS) $^ -o $@
+
 promise.o: platform/promise.c
 	$(CC) -I$(QUICKJS_INCLUDE_PATH) -I$(LIBUV_INCLUDE_PATH) -Iincludes/ -I. $(CCFLAGS) $^ -o $@
+
+mongoose.o: deps/mongoose/mongoose.c
+	$(CC) -Iincludes/ -I. $(CCFLAGS) $^ -o $@
 
 clean:
 	rm -f *.o

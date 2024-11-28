@@ -1,6 +1,10 @@
 #include "file_handler.h"
 
 
+void free_file_read_request(FileReadRequest* file_request);
+void free_file_write_request(FileWriteRequest* file_request);
+
+
 static void promise_file_after_read_request(uv_work_t *req, int status) {
 
     FileReadRequest* file_request = (FileReadRequest*)req->data;
@@ -8,6 +12,7 @@ static void promise_file_after_read_request(uv_work_t *req, int status) {
     JSValue *argv = malloc(sizeof(JSValue));
     argv[0] = arg;
     settle_promise(file_request->context, file_request->promise, 0, 1, argv);
+    free_file_read_request(file_request);
 }
 
 static void file_read_work_cb(uv_work_t *req) {
@@ -76,6 +81,16 @@ FileReadRequest* init_file_read_request(char* file_path, JSContext *ctx) {
 
 }
 
+void free_file_read_request(FileReadRequest* file_request) {
+    free(file_request->work);
+    free(file_request->buffer);
+    free(file_request->promise->rfuncs);
+    free(file_request->promise);
+    free(file_request->file_path);
+    free(file_request->result_buffer);
+    free(file_request);
+
+}
 
 
 static void promise_file_after_write_request(uv_work_t *req, int status) {
@@ -85,6 +100,7 @@ static void promise_file_after_write_request(uv_work_t *req, int status) {
     JSValue *argv = malloc(sizeof(JSValue));
     argv[0] = arg;
     resolve_promise(file_request->context, file_request->promise, 1, argv);
+    free_file_write_request(file_request);
 }
 
 static void file_write_work_cb(uv_work_t *req) {
@@ -152,4 +168,14 @@ FileWriteRequest* init_file_write_request(char* file_path, char* input_buffer, J
 
     return file_request;
 
+}
+
+void free_file_write_request(FileWriteRequest* file_request) {
+    free(file_request->work);
+    free(file_request->buffer);
+    free(file_request->promise->rfuncs);
+    free(file_request->promise);
+    free(file_request->file_path);
+    free(file_request->input_buffer);
+    free(file_request);
 }
